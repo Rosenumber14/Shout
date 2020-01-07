@@ -2,7 +2,6 @@ const socketRoomsHelper = require('./socketRoomsHelper');
 
 const initialize = (user, socket, io) => {
   console.log(`user ${user.id} connected`);
-  socketRoomsHelper.joinUserRoom(io, socket, user);
   // store the user_id on the socket
   socket.user_id = user.id;
   socket.emit('connected', user); // tell the user who they are
@@ -16,6 +15,14 @@ const initialize = (user, socket, io) => {
   });
   socket.on('error', (err) => {
     console.error(`error for user ${user.id}: ${err}`);
+  });
+
+  socket.on('join-room', (data) => {
+    if(socket.joinedRoom) {
+      socketRoomsHelper.leaveRoom(io, socket, socket.joinedRoom);
+    }
+    socket.joinedRoom = data.room;
+    socketRoomsHelper.joinRoom(io, socket, data.room, user);
   });
 };
 

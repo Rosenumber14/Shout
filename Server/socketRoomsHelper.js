@@ -7,7 +7,7 @@ const userRoomKeeper = new RoomKeeper();
 const MAX_CONNECTIONS_PER_USER = 10;
 
 const roomNamePrefixs = {
-  NAME: 'name_'
+  ROOM: 'room_'
 }
 class SocketRoomsHelper {
   // ////////////////***************CLOSE***************////////////////
@@ -73,7 +73,7 @@ class SocketRoomsHelper {
   }
 
   async joinUserRoom(io, socket, user) {
-    const room = getRoomName(null, null, user.id);
+    const room = getRoomName(user.id);
     await userRoomKeeper.joinRoom(io, socket, user.id, room, user);
     await this.disconnectFirstSocketUntilClientsLengthIsCorrect(io, room);
   }
