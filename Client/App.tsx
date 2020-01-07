@@ -44,16 +44,31 @@ class App extends React.Component {
   }
    constructor(props) {
     super(props);
-    navigator.geolocation.getCurrentPosition((location) => console.log(location), (error) => console.log('error', error))
     this.connectToSync();
+  }
+  async joinBucket(socket) {
+    navigator.geolocation.getCurrentPosition((location) => {
+      // get bucket that we want to join
+      //https://stackoverflow.com/questions/38115135/grouping-bucketing-latitude-and-longitude
+      const degToSplitAt = 5; //.05 deg
+      console.log(location)
+      const lat = Math.ceil(((location.coords.latitude + 90) * 100)) / degToSplitAt;
+      const long = Math.ceil(((location.coords.longitude + 180) * 100)) / degToSplitAt;
+      // "latitude": 33.45491146632184,
+      // "longitude": -111.7910586307323,
+      // room_2469.2_1364.2
+      socket.emit('join-room', {room: lat + '_' + long});
+    }, (error) => console.log('error', error));
   }
   async connectToSync() {
     const connectionQuery = `anonymous=true&id=${await _getData('anonymousId')}`;
     try {
       const io = require('socket.io-client');
-      const socket = io.connect('http://ee438ce3.ngrok.io', {query: connectionQuery});
+      const socket = io.connect('http://53ab6828.ngrok.io', {query: connectionQuery});
       socket.on('connect_error', (error) => { console.log('here', error)});
-      socket.on('connected', (e) => console.log(e));
+      socket.on('connected', (e) => {
+        this.joinBucket(socket);
+      });
       socket.on('connect', () => console.log('test'));
     } catch (e) {
       console.log(e)
